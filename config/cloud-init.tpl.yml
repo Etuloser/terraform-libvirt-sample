@@ -7,21 +7,29 @@ chpasswd:
 disable_root: false
 
 hostname: ${vm_hostname}
-fqdn: ${vm_hostname}.${domain}
 
 apt:
   preserve_sources_list: false
   sources_list: |
         Types: deb
-        URIs: http://mirror.arvancloud.ir/ubuntu
-        Suites: noble noble-updates noble-backports
-        Components: main universe restricted multiverse
+        URIs: https://mirrors.tuna.tsinghua.edu.cn/ubuntu
+        Suites: jammy jammy-updates jammy-backports
+        Components: main restricted universe multiverse
+        Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+        Types: deb
+        URIs: http://security.ubuntu.com/ubuntu/
+        Suites: jammy-security
+        Components: main restricted universe multiverse
         Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 packages:
+  - openssh-server
   - qemu-guest-agent
 
 runcmd:
-  - [ sed, -i, -e, '/^#PermitRootLogin .*\$/a PermitRootLogin yes', /etc/ssh/sshd_config ]
+  - [ sh, -c, 'rm -f /etc/ssh/sshd_config.d/*.conf' ]
+  - [ sh, -c, 'echo "PermitRootLogin yes" > /etc/ssh/sshd_config.d/99-root-login.conf' ]
+  - [ sh, -c, 'echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config.d/99-root-login.conf' ]
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
   - systemctl restart sshd
