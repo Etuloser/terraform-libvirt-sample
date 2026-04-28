@@ -8,6 +8,10 @@ resource "libvirt_domain" "ubuntu" {
   vcpu        = each.value.vcpu
   type        = "kvm"
 
+  cpu = {
+    mode = "host-passthrough"
+  }
+
   os = {
     type         = "hvm"
     type_arch    = "x86_64"
